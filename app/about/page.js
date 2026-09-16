@@ -1,10 +1,12 @@
 import Link from "next/link";
+import ExternalLink from "@/components/ExternalLink.jsx";
 import { sourceMeta } from "@/lib/sources/index.js";
 import { ACCESS, ACCESS_LABELS, ACCESS_DESCRIPTIONS, ACCESS_ORDER } from "@/lib/access.js";
 
 export const metadata = {
   title: "About",
-  description: "How OPAC 2026 searches open access collections, and what its access labels mean.",
+  description:
+    "How the Valenzuela City Library OPAC searches open access collections, and what its access labels mean.",
 };
 
 export default function AboutPage() {
@@ -12,9 +14,10 @@ export default function AboutPage() {
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="m-0 text-3xl font-bold tracking-tight">About this catalogue</h1>
       <p className="mt-3 text-lg text-muted">
-        OPAC 2026 is an open public access catalogue. It searches open collections
-        around the world at the same time and shows the results in one list. There is
-        no account, no membership and no paywall between you and anything it finds.
+        The Valenzuela City Library OPAC is an open public access catalogue. It
+        searches open collections around the world at the same time and shows the
+        results in one list. There is no account, no membership and no paywall
+        between you and anything it finds.
       </p>
 
       <h2 className="mt-12 text-xl font-bold">Who it is for</h2>
@@ -51,9 +54,9 @@ export default function AboutPage() {
         {sourceMeta.map((source) => (
           <li key={source.key} className="rounded-lg border border-line bg-card p-4">
             <h3 className="m-0 text-base font-semibold">
-              <a href={source.homepage} className="text-brand underline" rel="noopener noreferrer">
+              <ExternalLink href={source.homepage} className="text-brand underline">
                 {source.fullName}
-              </a>
+              </ExternalLink>
             </h3>
             <p className="mt-1 mb-0 text-sm text-muted">{source.description}</p>
           </li>

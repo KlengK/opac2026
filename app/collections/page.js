@@ -1,10 +1,11 @@
 import { curatedLinks } from "@/data/curatedLinks.js";
 import AccessBadge from "@/components/AccessBadge.jsx";
+import ExternalLink from "@/components/ExternalLink.jsx";
 
 export const metadata = {
   title: "Collections",
   description:
-    "Every open access collection OPAC 2026 searches or links to, with an honest note on what you can actually read.",
+    "Every open access collection this catalogue searches or links to, with an honest note on what you can actually read.",
 };
 
 export default function CollectionsPage() {
@@ -28,9 +29,9 @@ export default function CollectionsPage() {
             {links.map((link) => (
               <li key={link.slug} className="rounded-lg border border-line bg-card p-4">
                 <h3 className="m-0 text-base font-semibold">
-                  <a href={link.url} className="text-brand underline" rel="noopener noreferrer">
+                  <ExternalLink href={link.url} className="text-brand underline">
                     {link.title}
-                  </a>
+                  </ExternalLink>
                 </h3>
                 <p className="mt-1 mb-3 text-sm text-muted">{link.description}</p>
                 <div className="flex flex-wrap items-center gap-2">

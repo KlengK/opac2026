@@ -7,6 +7,7 @@ import FacetPanel from "./FacetPanel.jsx";
 import ResultCard from "./ResultCard.jsx";
 import PortalCard from "./PortalCard.jsx";
 import SourceStatus from "./SourceStatus.jsx";
+import { VALACE_URL } from "@/lib/site.js";
 
 const EMPTY_SELECTION = { access: new Set(), source: new Set(), category: new Set(), format: new Set() };
 
@@ -127,7 +128,7 @@ export default function SearchExperience() {
                 <h3 id="portals-heading" className="m-0 text-sm font-bold uppercase tracking-wide text-muted">
                   Whole collections worth browsing
                 </h3>
-                <ul className="mt-3 grid gap-3 sm:grid-cols-2 list-none p-0 m-0">
+                <ul className="fade-in mt-3 grid gap-3 sm:grid-cols-2 list-none p-0 m-0">
                   {state.data.portals.map((portal) => (
                     <PortalCard key={portal.slug} portal={portal} />
                   ))}
@@ -138,7 +139,7 @@ export default function SearchExperience() {
             {results.length === 0 ? (
               <EmptyState query={query} hasFacets={hasSelection(selected)} onClear={clearFacets} />
             ) : (
-              <ul className="mt-6 space-y-3 list-none p-0 m-0">
+              <ul className="fade-in mt-6 space-y-3 list-none p-0 m-0">
                 {results.map((result) => (
                   <ResultCard key={result.id} result={result} />
                 ))}
@@ -154,16 +155,38 @@ export default function SearchExperience() {
 function Hero({ onSearch }) {
   return (
     <div className="py-10 sm:py-16">
-      <h1 className="m-0 text-3xl sm:text-4xl font-bold tracking-tight max-w-3xl">
-        One search box for the world&apos;s open libraries
-      </h1>
-      <p className="mt-4 mb-8 max-w-2xl text-lg text-muted">
-        Books, journal articles, theses and archive material that are genuinely free
-        to read. No account, no institution, no paywall — and every result tells you
-        up front how much of it you can actually open.
-      </p>
-      <div className="max-w-3xl">
-        <SearchForm onSearch={onSearch} size="large" />
+      {/* Column order matters on a phone: the search box stays above the logo so
+          the primary action is not pushed below the fold. */}
+      <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="w-full lg:flex-1">
+          <h1 className="m-0 text-3xl sm:text-4xl font-bold tracking-tight">
+            One search box for the world&apos;s open libraries
+          </h1>
+          <p className="mt-4 mb-8 max-w-2xl text-lg text-muted">
+            Books, journal articles, theses and archive material that are genuinely
+            free to read. No account, no institution, no paywall — and every result
+            tells you up front how much of it you can actually open.
+          </p>
+          <div className="max-w-3xl">
+            <SearchForm onSearch={onSearch} size="large" />
+          </div>
+        </div>
+
+        <a
+          href={VALACE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pressable flex w-full flex-none items-center justify-center rounded-xl lg:w-auto"
+        >
+          <img
+            src="/ValACELogo.png"
+            alt="ValACE — Valenzuela City Academic Center for Excellence"
+            width={420}
+            height={420}
+            className="h-64 w-64 object-contain sm:h-80 sm:w-80 lg:h-[26rem] lg:w-[26rem]"
+          />
+          <span className="visually-hidden"> (opens in a new tab)</span>
+        </a>
       </div>
     </div>
   );

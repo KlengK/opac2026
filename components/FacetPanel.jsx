@@ -71,7 +71,7 @@ export default function FacetPanel({ facets, selected, onToggle, onClear }) {
                   <li key={option.value}>
                     <label
                       htmlFor={id}
-                      className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-brand-soft"
+                      className="tap-flash flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-brand-soft"
                     >
                       <input
                         id={id}

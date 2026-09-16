@@ -67,6 +67,19 @@ describe("accessibility", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
+  it("opens a result in a new tab and says so in the link name", () => {
+    render(
+      <ul>
+        <ResultCard result={sampleResult} />
+      </ul>
+    );
+    const link = screen.getByRole("link", { name: /Rice Yields Under Climate Stress/i });
+    expect(link).toHaveAttribute("target", "_blank");
+    // Without noopener the opened page can reach back through window.opener.
+    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    expect(link).toHaveAccessibleName(/opens in a new tab/i);
+  });
+
   it("labels every facet checkbox", () => {
     render(
       <FacetPanel

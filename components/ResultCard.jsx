@@ -1,11 +1,12 @@
 import AccessBadge from "./AccessBadge.jsx";
+import ExternalLink from "./ExternalLink.jsx";
 
 export default function ResultCard({ result }) {
   const authors = result.authors.slice(0, 3).join(", ");
   const moreAuthors = result.authors.length > 3 ? ` and ${result.authors.length - 3} more` : "";
 
   return (
-    <li className="rounded-lg border border-line bg-card p-4">
+    <li className="liftable rounded-lg border border-line bg-card p-4">
       <article className="flex gap-4">
         {result.coverUrl ? (
           // The title sits right beside it, so the cover adds nothing for a
@@ -23,9 +24,9 @@ export default function ResultCard({ result }) {
         <div className="min-w-0 flex-1">
           <h3 className="m-0 text-base font-semibold leading-snug">
             {result.url ? (
-              <a href={result.url} className="text-brand underline" rel="noopener noreferrer">
+              <ExternalLink href={result.url} className="text-brand underline">
                 {result.title}
-              </a>
+              </ExternalLink>
             ) : (
               result.title
             )}

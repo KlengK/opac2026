@@ -41,7 +41,7 @@ export default function KioskLauncher({ links }) {
             <button
               type="button"
               onClick={() => setStage({ name: "survey", link })}
-              className="flex h-full w-full flex-col items-start gap-2 rounded-lg border border-line bg-card p-5 text-left hover:border-brand"
+              className="pressable flex h-full w-full flex-col items-start gap-2 rounded-lg border border-line bg-card p-5 text-left hover:border-brand"
             >
               <span className="text-lg font-semibold text-ink">{link.title}</span>
               <span className="text-sm text-muted">{link.description}</span>

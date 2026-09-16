@@ -114,9 +114,11 @@ export const curatedLinks = [
   },
   {
     slug: "valenzuela-opac",
-    title: "Valenzuela City Library Catalogue",
+    // Distinct from this site: that catalogue covers books on the shelf, this one
+    // covers open access material online.
+    title: "Valenzuela City Library — books on the shelf",
     description:
-      "The public catalogue of the Valenzuela City Library system — for physical books available on the shelf.",
+      "The shelf catalogue of the Valenzuela City Library system, for physical books you borrow in person.",
     url: "https://library.valenzuela.gov.ph",
     searchUrlTemplate: null,
     region: "Philippines",
