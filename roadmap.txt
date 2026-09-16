@@ -1,0 +1,82 @@
+# OPAC 2026 — Open, Public, Accessible Catalog
+
+## Context
+
+Valenzuela City's library currently runs two separate, Koha-dependent systems: `opac/` (a Laravel+React federated search layer whose physical catalog *and* patron/staff login both depend on a Koha ILS instance) and `opaccounter/` (a standalone PHP kiosk launcher with a demographic-survey gate). [ERESOURCES_AUDIT.md](../../../Desktop/systems/opac2026/ERESOURCES_AUDIT.md) catalogs ~20 open-access resources scattered across a printed library graphic, opac's curated-links seeder, and opaccounter's button list — several stale, one mislabeled, several genuinely open, a few only partially open.
+
+The ask: build **opac2026** as a single, unified OPAC whose entire purpose is open access — no login wall, no institutional gatekeeping — so any student, teacher, researcher, or member of the public can search one box and reach real full text across dozens of open repositories. Decisions made so far:
+
+- **Fresh rebuild** in `opac2026/`, porting the proven ideas from `opac/` (the search-aggregation pattern, the 5 existing API service integrations, the curated-links model) rather than continuing inside the old repo.
+- **Drop the Koha dependency entirely.** No physical-catalog mirror, no patron/staff accounts, no card-number+birthdate login. opac2026 is a public, unauthenticated discovery portal over open-access content only.
+- **Expand source coverage**: keep Google Books, Open Library, DOAJ, OpenAlex, Unpaywall; add DPLA, Internet Archive (public-domain only), HathiTrust (rights-filtered), DOAB, Open Book Publishers, SpringerOpen, PMC, and the PH-specific portals (STARBOOKS, eLib, NLP, KWF, PIDS, UN/UNESCO Digital Library, Acta Medica Philippina), fixing the two known-broken URLs from the audit.
+- **Accessible by everyone** is a first-class requirement (WCAG 2.1 AA), not a retrofit — the audit of `opac/frontend` found essentially no ARIA/labeling discipline today.
+- **Build order: prototype first, then production.** Ship a **stateless, database-free prototype deployed on Vercel** to prove out the search-aggregation UX and source coverage. The full Koha-free-but-still-persistent architecture (admin CRUD, analytics, kiosk logging, Docker) is a **documented roadmap**, not part of this build.
+
+## Prototype scope (build this now)
+
+**Stack**: Next.js (App Router, JavaScript) deployed on Vercel. One app, two halves:
+- **Frontend**: React search UI, rebuilt accessibility-first (this is not optional — see below), reusing the layout ideas from `opac/frontend/src/App.jsx` and the architecture-explainer copy from `About.jsx` (corrected: the audit flagged its Google-Books-as-open-source claim as overstated, so the rewritten About page must not repeat that error).
+- **Backend**: Vercel serverless functions under `app/api/**` acting as thin proxy/aggregator routes for each external source — needed because (a) some APIs require a server-side key that can't ship to the browser (DPLA), (b) it avoids CORS issues, and (c) it's the one place to normalize every source into a common shape before the client renders it.
+
+**No database, anywhere, in the prototype.** Concretely:
+- **Curated links** (PH portals + HathiTrust/OBP/SpringerOpen cards) live in a static data file (`data/curatedLinks.js`) committed to the repo — editing it is a code change, not an admin-panel action. This directly replaces `CuratedLinksSeeder.php` + opaccounter's `opac_sources` table for now.
+- **No admin panel, no auth, no CRUD UI** in the prototype — nothing to manage without persistence. (Roadmap item below.)
+- **No analytics/telemetry persistence** (`search_events`, `telemetry_logs`, `kiosk_usage_logs` do not exist yet) — the prototype may still emit console/debug timing info during development, but nothing is stored.
+- **Kiosk mode is UI-only in the prototype**: the launcher grid and (optional) demographic survey screen are built and navigable, but submitting the survey just proceeds to the redirect — it does not persist anywhere yet. Note this limitation directly in the UI/copy so it's not mistaken for a working data-capture feature.
+- **Caching** uses Next.js's built-in fetch caching / route-segment revalidation (`revalidate` / `Cache-Control` headers) instead of Redis — good enough for a prototype's request volume, and removes the need for any backing service.
+
+## New source integrations — honest technical assessment
+
+Not every source in the audit has a clean, free, public search API. Plan accordingly rather than papering over gaps:
+
+| Source | Integration approach |
+|---|---|
+| DOAJ, OpenAlex, Unpaywall, Open Library, Google Books | Port the request/normalization logic from `opac/backend/app/Services/*.php` into equivalent JS modules under `app/api/search/sources/`, called from serverless functions |
+| DPLA | Live API call from a serverless route (`app/api/search/sources/dpla.js`) — free API key, kept server-side only via a Vercel env var |
+| Internet Archive | Live API via `archive.org/advancedsearch.php`, filtered to `mediatype=texts` + public-domain/open licensing |
+| PMC (PubMed Central) | Live API via NCBI E-utilities (esearch/efetch) |
+| DOAB | Live API via DOAB's OAI-PMH/search interface |
+| HathiTrust | **Curated/metadata-only**, not live full-text search — their full-text search API requires a partnership; link out to `catalog.hathitrust.org` pre-filtered to "Full view" so only genuinely open (pre-1931 US / pre-1901 foreign) items surface |
+| Open Book Publishers | **Curated link only** — already indexed by DOAB, so a bespoke OBP integration would just duplicate DOAB results |
+| SpringerOpen | **No bespoke service** — its journals are already indexed by DOAJ/OpenAlex; add a `publisher` facet/badge on results from those sources instead, plus a curated portal card |
+| PH portals (STARBOOKS, eLib, NLP e-Resources, KWF, PIDS, UN Digital Library, UNESCO Digital Library, Acta Medica Philippina) | Static `curatedLinks.js` entries, title-matched into search results — with the two broken URLs fixed (STARBOOKS → `https://www.starbooks.ph/`, NLP e-Resources → a re-verified current working URL, since the audit already flagged the old one as stale) |
+
+## Implementation plan
+
+**1. Scaffold the Next.js app** — `opac2026/` as a single Next.js (App Router) project, Tailwind for styling, deployable to Vercel with zero extra config. No `docker-compose.yml` yet (that's roadmap).
+
+**2. Port the aggregation logic into serverless functions** — one `app/api/search/route.js` that fans out to per-source modules concurrently (`Promise.allSettled`, with a timeout per source so one slow API can't stall the response), normalizes every result to `{id, title, author, source, format, coverUrl, availability, openAccessStatus, subject, links}`, merges, dedupes by title+author, scores relevance, computes facets, and returns JSON. Port `SubjectMapper`'s taxonomy idea but fix its substring-match bug (word-boundary matching, not `includes()`).
+
+**3. Build each source module** — port the 5 existing services' request/normalization logic, then add `dpla.js`, `internetArchive.js`, `pmc.js`, `doab.js`. Each module fails independently (caught and excluded, never throws the whole aggregate response).
+
+**4. Build `data/curatedLinks.js`** — the static replacement for `CuratedLinksSeeder.php` + opaccounter's `opac_sources`, covering all PH portals plus HathiTrust/OBP/SpringerOpen cards, each with `title, description, url, tags, showInKiosk` fields (same shape a future DB table would use, to make the eventual migration mechanical).
+
+**5. Build the accessibility-first search UI** — semantic landmarks, skip-to-content link, `<label>`-associated search input, `aria-live` region for result-count/loading state, keyboard-navigable facet sidebar, non-color-only availability/status indicators, alt text on every cover image, visible focus states, an "Open Access status" badge per result (fully open / partial-restricted / metadata-only) so users always know what they're actually getting — directly reflecting the audit's ⚠️ findings (Internet Archive CDL, HathiTrust rights-restricted items, Open Library lending-restricted books).
+
+**6. Build the kiosk launcher UI** — curated-portal grid (from `curatedLinks.js`, filtered by `showInKiosk`) plus the demographic-survey screen, with an accessible countdown/redirect (announced via `aria-live`, pausable, cancelable — not a silent timer). Clearly labeled as non-persistent in this build.
+
+**7. Write the About page** — port and correct the architecture-explainer content from `opac/frontend/src/pages/About.jsx`, fixing the Google-Books-as-open-source overstatement the audit flagged, and reflecting the actual prototype architecture (no Koha, no accounts).
+
+**8. Basic tests** — unit tests for each source module's normalization function and for the merge/dedupe/scoring logic (Vitest); component tests for the search UI plus automated `axe-core` accessibility assertions (this is the one piece of "testing rigor" worth keeping even at prototype stage, since accessibility is a stated hard requirement, not a nice-to-have).
+
+**9. Deploy to Vercel** — connect the repo, set the source API keys/emails as Vercel environment variables (real `UNPAYWALL_EMAIL`, `DPLA_API_KEY`, `OPENALEX_MAILTO`), confirm the serverless functions execute within Vercel's function timeout for the slowest source, ship.
+
+## Roadmap (documented now, not built yet)
+
+Once the prototype validates the UX and source coverage, the production build adds back persistence, containerized via Docker (per the original architecture explored from `opac/`):
+
+- **Database** (Postgres/MySQL) replacing `data/curatedLinks.js` with a real `curated_links` table + admin CRUD.
+- **Local admin panel** with its own username/password auth (`admins` table, hashed passwords) — explicitly *not* Koha Basic-Auth, since Koha is out of scope for this project.
+- **Persistent analytics**: `search_events`, `telemetry_logs`, and `kiosk_usage_logs` tables, wired up so the kiosk survey and click telemetry actually record data.
+- **Redis-backed caching** replacing Next.js route caching once request volume justifies it.
+- **Docker Compose** deployment (nginx + app + db + redis) as an alternative to Vercel for self-hosting on library infrastructure.
+- **Security hardening carried over from the `opac/` audit**: no secrets shipped to the frontend bundle, full `.env.example` coverage, rate limiting on write endpoints.
+- **CI**: GitHub Actions running lint + unit tests + `axe-core` checks + build on every PR, since neither `opac/` nor `opaccounter/` had CI.
+
+## Verification
+
+- `npm run dev`, then `GET /api/search?q=climate change` should return merged, deduped, faceted JSON spanning at least DOAJ, OpenAlex, Google Books, Open Library, DPLA, Internet Archive, and PMC.
+- Manually walk the kiosk flow end-to-end in the browser: launcher grid → pick a portal → survey screen → redirect; confirm the countdown is screen-reader-announced and pausable/cancelable.
+- Run `axe-core` checks (automated in the test suite) plus one manual NVDA/VoiceOver pass on the search page and kiosk flow before calling the frontend done.
+- Confirm the two broken links from the audit are fixed by requesting them directly: STARBOOKS resolves to `https://www.starbooks.ph/`, NLP e-Resources resolves to a real (non-generic-homepage) e-resources page.
+- Deploy a Vercel preview build and confirm search works end-to-end against live external APIs (not mocks) before merging to production.

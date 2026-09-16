@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #fbfaf7;
+  --card: #ffffff;
+  --line: #e4e2dc;
+  --ink: #10203f;
+  --muted: #4a5568;
+  --brand: #1d4ed8;
+  --brand-soft: #eef2ff;
+  --open: #15803d;
+  --open-soft: #eaf6ee;
+  --partial: #9a6300;
+  --partial-soft: #fdf3e2;
+  --meta: #4a5568;
+  --meta-soft: #f1f2f4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b1220;
+    --card: #141d2f;
+    --line: #26314a;
+    --ink: #e9eef6;
+    --muted: #a3b3c9;
+    --brand: #8ab4ff;
+    --brand-soft: #18233c;
+    --open: #6ee7a8;
+    --open-soft: #14301f;
+    --partial: #f0c36b;
+    --partial-soft: #322408;
+    --meta: #a3b3c9;
+    --meta-soft: #1c2637;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-open: var(--open);
+  --color-open-soft: var(--open-soft);
+  --color-partial: var(--partial);
+  --color-partial-soft: var(--partial-soft);
+  --color-meta: var(--meta);
+  --color-meta-soft: var(--meta-soft);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* A single, consistent, clearly visible focus indicator everywhere. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect users who have asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Off-screen until focused, then a real, visible target. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  padding: 0.75rem 1.25rem;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.15);
+  transition: top 150ms ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
