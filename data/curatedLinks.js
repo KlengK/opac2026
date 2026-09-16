@@ -146,6 +146,7 @@ export const curatedLinks = [
   },
   {
     slug: "doaj",
+    liveSource: "doaj",
     title: "Directory of Open Access Journals",
     description:
       "An index of vetted, fully open access, peer-reviewed journals covering every discipline.",
@@ -160,6 +161,7 @@ export const curatedLinks = [
   },
   {
     slug: "doab",
+    liveSource: "doab",
     title: "Directory of Open Access Books",
     description:
       "Peer-reviewed academic books that are free to download in full, from hundreds of scholarly publishers.",
@@ -188,6 +190,7 @@ export const curatedLinks = [
   },
   {
     slug: "pmc",
+    liveSource: "pmc",
     title: "PubMed Central",
     description:
       "The US National Library of Medicine's free archive of biomedical and life sciences journal literature.",
@@ -216,6 +219,7 @@ export const curatedLinks = [
   },
   {
     slug: "dpla",
+    liveSource: "dpla",
     title: "Digital Public Library of America",
     description:
       "Digitised books, photographs, manuscripts and records from thousands of US libraries, archives and museums.",
@@ -230,6 +234,7 @@ export const curatedLinks = [
   },
   {
     slug: "internet-archive",
+    liveSource: "internetarchive",
     title: "Internet Archive",
     description:
       "A vast library of texts, audio and video. Public domain items are free to read; in-copyright books are lending-only.",
@@ -261,6 +266,7 @@ export const curatedLinks = [
   },
   {
     slug: "open-library",
+    liveSource: "openlibrary",
     title: "Open Library",
     description:
       "A catalogue entry for every book ever published. Many titles can be read or borrowed online.",
@@ -304,6 +310,7 @@ export const curatedLinks = [
   },
   {
     slug: "openalex",
+    liveSource: "openalex",
     title: "OpenAlex",
     description:
       "An open catalogue of the world's scholarly output — papers, authors, institutions and how they connect.",

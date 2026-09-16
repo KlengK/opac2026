@@ -176,7 +176,10 @@ function Hero({ onSearch }) {
           href={VALACE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="pressable flex w-full flex-none items-center justify-center rounded-xl lg:w-auto"
+          // Hidden below lg, where the hero stacks: on a phone the logo would sit
+          // under the search box as dead weight. The navbar logo still carries the
+          // branding at every width.
+          className="pressable hidden w-full flex-none items-center justify-center rounded-xl lg:flex lg:w-auto"
         >
           <img
             src="/ValACELogo.png"
